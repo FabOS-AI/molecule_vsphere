@@ -1,0 +1,3 @@
+- name: "Install pip packages on control node"
+  ansible.builtin.pip:
+    name: "{{ control_node_pip_packages }}"

@@ -1,0 +1,25 @@
+- name: Get guest_info
+  community.vmware.vmware_guest_info:
+    hostname: "{{ vsphere_hostname }}"
+    username: "{{ vsphere_user }}"
+    password: "{{ vsphere_password }}"
+    validate_certs: "{{ vsphere_validate_certs }}"
+    datacenter: "{{ vsphere_datacenter }}"
+
+    folder: "{{ vsphere_folder_name }}"
+    name: "{{ vm_name }}"
+  register: guest_info
+
+- name: "Add VM '{{vm_name}}' to Ansible Inventory"
+  add_host:
+    name: "{{ item.name }}"
+    groups: "{{ item.groups | default([]) }}"
+    ansible_connection: ssh
+    ansible_host: "{{ guest_info.instance.ipv4 }}"
+    ansible_user: "{{ vm_template_username }}"
+    ansible_ssh_pass: "{{ vm_template_password }}"
+    ansible_become_pass: "{{ vm_template_password }}"
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o "UserKnownHostsFile=/dev/null"'
+  no_log: true
+  changed_when: false

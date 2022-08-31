@@ -1,0 +1,137 @@
+---
+- assert:
+    that:
+      - vsphere_folder_name is defined
+
+- name: Set username var
+  ansible.builtin.set_fact:
+    username: "{{ vsphere_user | split('@') | first }}"
+
+- name: Clear known hosts file
+  ansible.builtin.file:
+    path: /root/.ssh/known_hosts
+    state: absent
+
+- name: "Deploy Virtual Machines into folder '{{ vsphere_folder_name }}'"
+  community.vmware.vmware_content_deploy_ovf_template:
+    hostname: "{{ vsphere_hostname }}"
+    username: "{{ vsphere_user }}"
+    password: "{{ vsphere_password }}"
+    datacenter: "{{ vsphere_datacenter }}"
+    datastore: "{{ vsphere_datastore }}"
+    cluster: "{{ vsphere_cluster }}"
+    validate_certs: "{{ vsphere_validate_certs }}"
+
+    ovf_template: "{{ vm_template_name }}"
+    folder: "{{ vsphere_folder_name }}"
+    name: "{{ vm_name }}"
+  register: vmware_content_deploy_result
+  failed_when: false
+  changed_when: false
+  loop: "{{ molecule_yml.platforms }}"
+  vars:
+    vm_name: "{{username}}_{{vm_prefix}}{{ item.name }}"
+    vm_template_name: "{{ item.template_name }}"
+#  changed_when: "not 'already Exists' in vmware_content_deploy_result.vm_deploy_info.msg"
+  async: 30
+  poll: 0
+
+- name: Wait for guest_info being available
+  community.vmware.vmware_guest_info:
+    hostname: "{{ vsphere_hostname }}"
+    username: "{{ vsphere_user }}"
+    password: "{{ vsphere_password }}"
+    validate_certs: "{{ vsphere_validate_certs }}"
+    datacenter: "{{ vsphere_datacenter }}"
+
+    folder: "{{ vsphere_folder_name }}"
+    name: "{{ vm_name }}"
+  loop: "{{ molecule_yml.platforms }}"
+  vars:
+    vm_name: "{{username}}_{{vm_prefix}}{{ item.name }}"
+    vm_template_name: "{{ item.template_name }}"
+  register: guest_info
+  until: not guest_info.failed
+  retries: 30
+
+- name: "Set hardware spec of VMs"
+  community.vmware.vmware_guest:
+    hostname: "{{ vsphere_hostname }}"
+    username: "{{ vsphere_user }}"
+    password: "{{ vsphere_password }}"
+    datacenter: "{{ vsphere_datacenter }}"
+    datastore: "{{ vsphere_datastore }}"
+    cluster: "{{ vsphere_cluster }}"
+    validate_certs: "{{ vsphere_validate_certs }}"
+
+    folder: "{{ vsphere_folder_name }}"
+    name: "{{ vm_name }}"
+    state: present
+    disk:
+    - size_gb: "{{ vm_disk_size_gb }}"
+      type: thin
+      datastore: "{{ vsphere_datastore }}"
+    hardware:
+      memory_mb: "{{ vm_memory_mb }}"
+      num_cpus: "{{ vm_cpu }}"
+      num_cpu_cores_per_socket: "{{ vm_cpu_cores }}"
+  loop: "{{ molecule_yml.platforms }}"
+  vars:
+    vm_name: "{{username}}_{{vm_prefix}}{{ item.name }}"
+    vm_template_name: "{{ item.template_name }}"
+  register: set_hardware_spec
+  until: not set_hardware_spec.failed
+  retries: 30
+
+- name: "Make sure VMs are 'poweredon'"
+  community.vmware.vmware_guest:
+    hostname: "{{ vsphere_hostname }}"
+    username: "{{ vsphere_user }}"
+    password: "{{ vsphere_password }}"
+    datacenter: "{{ vsphere_datacenter }}"
+    datastore: "{{ vsphere_datastore }}"
+    cluster: "{{ vsphere_cluster }}"
+    validate_certs: "{{ vsphere_validate_certs }}"
+
+    name: "{{ vm_name }}"
+    state: poweredon
+  loop: "{{ molecule_yml.platforms }}"
+  vars:
+    vm_name: "{{username}}_{{vm_prefix}}{{ item.name }}"
+    vm_template_name: "{{ item.template_name }}"
+  register: vmware_poweron_result
+  async: 30
+  poll: 0
+
+- name: Wait for ip addresses being available
+  community.vmware.vmware_guest_info:
+    hostname: "{{ vsphere_hostname }}"
+    username: "{{ vsphere_user }}"
+    password: "{{ vsphere_password }}"
+    validate_certs: "{{ vsphere_validate_certs }}"
+    datacenter: "{{ vsphere_datacenter }}"
+
+    folder: "{{ vsphere_folder_name }}"
+    name: "{{ vm_name }}"
+  loop: "{{ molecule_yml.platforms }}"
+  vars:
+    vm_name: "{{username}}_{{vm_prefix}}{{ item.name }}"
+  register: guest_info
+  until: guest_info.instance.ipv4 | d(False)
+  retries: 30
+
+- name: Add vm to ansible inventory
+  include_tasks: helper/add_vm_to_ansible_inventory.yml
+  loop: "{{ molecule_yml.platforms }}"
+  vars:
+    vm_name: "{{username}}_{{vm_prefix}}{{ item.name }}"
+    vm_template_name: "{{ item.template_name }}"
+
+- name: "Set Hostname"
+  ansible.builtin.command: "hostname {{ vm_name }}"
+  loop: "{{ molecule_yml.platforms }}"
+  vars:
+    vm_name: "{{ item.name }}"
+  delegate_to: "{{ vm_name }}"
+  become: yes
+  changed_when: false

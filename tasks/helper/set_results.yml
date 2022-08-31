@@ -1,0 +1,32 @@
+---
+- name: Set username var
+  ansible.builtin.set_fact:
+    username: "{{ vsphere_user | split('@') | first }}"
+
+- name: "Get guest infos of '{{item.name}}'"
+  community.vmware.vmware_guest_info:
+    hostname: "{{ vsphere_hostname }}"
+    username: "{{ vsphere_user }}"
+    password: "{{ vsphere_password }}"
+    validate_certs: "{{ vsphere_validate_certs }}"
+    datacenter: "{{ vsphere_datacenter }}"
+
+    folder: "{{ vsphere_folder_name }}"
+    name: "{{ vm_name }}"
+  register: guest_info
+  vars:
+    vm_name: "{{username}}_{{vm_prefix}}{{ item.name }}"
+
+- set_fact:
+    results: |
+      {{ results | default([]) +
+        [{
+          'instance': item.name,
+          'address': guest_info.instance.ipv4,
+          'user': 'ansible',
+          'password': 'password',
+          'port': 22,
+          'connection': 'ssh',
+          'identity_file': ''
+        }]
+      }}
