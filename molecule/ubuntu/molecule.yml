@@ -4,15 +4,15 @@ dependency:
 driver:
   name: delegated
 platforms:
-##### CENTOS
-  - name: centos7
-    template_name: centos-7
+##### UBUNTU
+  - name: ubuntu2204
+    template_name: ubuntu-22-04
 
-  - name: centos8
-    template_name: centos-stream-8
+  - name: ubuntu2004
+    template_name: ubuntu-20-04
 
-  - name: centos9
-    template_name: centos-stream-9
+  - name: ubuntu1804
+    template_name: ubuntu-18-04
 provisioner:
   name: ansible
   playbooks:
