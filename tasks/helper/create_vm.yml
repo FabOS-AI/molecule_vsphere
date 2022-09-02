@@ -85,25 +85,29 @@
   until: not set_hardware_spec.failed
   retries: 30
 
-- name: "Make sure VMs are 'poweredon'"
-  community.vmware.vmware_guest:
-    hostname: "{{ vsphere_hostname }}"
-    username: "{{ vsphere_user }}"
-    password: "{{ vsphere_password }}"
-    datacenter: "{{ vsphere_datacenter }}"
-    datastore: "{{ vsphere_datastore }}"
-    cluster: "{{ vsphere_cluster }}"
-    validate_certs: "{{ vsphere_validate_certs }}"
-
-    name: "{{ vm_name }}"
-    state: poweredon
+- name: Poweron VMs
+  include_tasks: helper/power_on_vm.yml
   loop: "{{ molecule_yml.platforms }}"
-  vars:
-    vm_name: "{{username}}_{{vm_prefix}}{{ item.name }}"
-    vm_template_name: "{{ item.template_name }}"
-  register: vmware_poweron_result
-  async: 30
-  poll: 0
+
+#- name: "Make sure VMs are 'poweredon'"
+#  community.vmware.vmware_guest:
+#    hostname: "{{ vsphere_hostname }}"
+#    username: "{{ vsphere_user }}"
+#    password: "{{ vsphere_password }}"
+#    datacenter: "{{ vsphere_datacenter }}"
+#    datastore: "{{ vsphere_datastore }}"
+#    cluster: "{{ vsphere_cluster }}"
+#    validate_certs: "{{ vsphere_validate_certs }}"
+#
+#    name: "{{ vm_name }}"
+#    state: poweredon
+#  loop: "{{ molecule_yml.platforms }}"
+#  vars:
+#    vm_name: "{{username}}_{{vm_prefix}}{{ item.name }}"
+#    vm_template_name: "{{ item.template_name }}"
+#  register: vmware_poweron_result
+#  async: 30
+#  poll: 0
 
 - name: Wait for ip addresses being available
   community.vmware.vmware_guest_info:
@@ -130,10 +134,8 @@
     vm_template_name: "{{ item.template_name }}"
 
 - name: "Set Hostname"
-  ansible.builtin.command: "hostname {{ vm_name }}"
+  ansible.builtin.command: "hostname {{ item.name }}"
   loop: "{{ molecule_yml.platforms }}"
-  vars:
-    vm_name: "{{ item.name }}"
-  delegate_to: "{{ vm_name }}"
+  delegate_to: "{{ item.name }}"
   become: yes
   changed_when: false

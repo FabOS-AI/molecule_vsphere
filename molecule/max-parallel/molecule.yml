@@ -25,46 +25,46 @@ platforms:
     template_name: ubuntu-22-04
   - name: ubuntu2204-10
     template_name: ubuntu-22-04
-  - name: ubuntu2204-11
-    template_name: ubuntu-22-04
-  - name: ubuntu2204-12
-    template_name: ubuntu-22-04
-  - name: ubuntu2204-13
-    template_name: ubuntu-22-04
-  - name: ubuntu2204-14
-    template_name: ubuntu-22-04
-  - name: ubuntu2204-15
-    template_name: ubuntu-22-04
-  - name: ubuntu2204-16
-    template_name: ubuntu-22-04
-  - name: ubuntu2204-17
-    template_name: ubuntu-22-04
-  - name: ubuntu2204-18
-    template_name: ubuntu-22-04
-  - name: ubuntu2204-19
-    template_name: ubuntu-22-04
-  - name: ubuntu2204-20
-    template_name: ubuntu-22-04
-  - name: ubuntu2204-21
-    template_name: ubuntu-22-04
-  - name: ubuntu2204-22
-    template_name: ubuntu-22-04
-  - name: ubuntu2204-23
-    template_name: ubuntu-22-04
-  - name: ubuntu2204-24
-    template_name: ubuntu-22-04
-  - name: ubuntu2204-25
-    template_name: ubuntu-22-04
-  - name: ubuntu2204-26
-    template_name: ubuntu-22-04
-  - name: ubuntu2204-27
-    template_name: ubuntu-22-04
-  - name: ubuntu2204-28
-    template_name: ubuntu-22-04
-  - name: ubuntu2204-29
-    template_name: ubuntu-22-04
-  - name: ubuntu2204-30
-    template_name: ubuntu-22-04
+#  - name: ubuntu2204-11
+#    template_name: ubuntu-22-04
+#  - name: ubuntu2204-12
+#    template_name: ubuntu-22-04
+#  - name: ubuntu2204-13
+#    template_name: ubuntu-22-04
+#  - name: ubuntu2204-14
+#    template_name: ubuntu-22-04
+#  - name: ubuntu2204-15
+#    template_name: ubuntu-22-04
+#  - name: ubuntu2204-16
+#    template_name: ubuntu-22-04
+#  - name: ubuntu2204-17
+#    template_name: ubuntu-22-04
+#  - name: ubuntu2204-18
+#    template_name: ubuntu-22-04
+#  - name: ubuntu2204-19
+#    template_name: ubuntu-22-04
+#  - name: ubuntu2204-20
+#    template_name: ubuntu-22-04
+#  - name: ubuntu2204-21
+#    template_name: ubuntu-22-04
+#  - name: ubuntu2204-22
+#    template_name: ubuntu-22-04
+#  - name: ubuntu2204-23
+#    template_name: ubuntu-22-04
+#  - name: ubuntu2204-24
+#    template_name: ubuntu-22-04
+#  - name: ubuntu2204-25
+#    template_name: ubuntu-22-04
+#  - name: ubuntu2204-26
+#    template_name: ubuntu-22-04
+#  - name: ubuntu2204-27
+#    template_name: ubuntu-22-04
+#  - name: ubuntu2204-28
+#    template_name: ubuntu-22-04
+#  - name: ubuntu2204-29
+#    template_name: ubuntu-22-04
+#  - name: ubuntu2204-30
+#    template_name: ubuntu-22-04
 provisioner:
   name: ansible
   playbooks:
