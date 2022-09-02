@@ -13,3 +13,8 @@ $ nano /etc/ansible/ansible.cfg
 4. add /tmp/roles to roles_path
 
 roles_path=~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles:/tmp/roles
+
+
+ODER:
+
+$ ln -s /tmp/roles/ ~/.ansible/roles/molecule_vsphere
