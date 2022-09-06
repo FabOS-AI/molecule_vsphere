@@ -9,7 +9,7 @@
     username: "{{ vsphere_user }}"
     password: "{{ vsphere_password }}"
     datacenter: "{{ vsphere_datacenter }}"
-    datastore: "{{ vsphere_datastore }}"
+    datastore_cluster: "{{ vsphere_datastore_cluster }}"
     cluster: "{{ vsphere_cluster }}"
     validate_certs: "{{ vsphere_validate_certs }}"
 

@@ -7,6 +7,7 @@ control_node_pip_packages:
 # vsphere
 vsphere_datacenter: Ansible
 vsphere_datastore: Datastore01
+vsphere_datastore_cluster: Storage
 vsphere_cluster: Ansible
 vsphere_validate_certs: no
 vsphere_folder_molecule: molecule
