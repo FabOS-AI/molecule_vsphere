@@ -15,46 +15,46 @@
 - include_tasks: helper/deploy_vm.yml
   loop: "{{ molecule_yml.platforms }}"
 
-#- name: "Deploy Virtual Machines into folder '{{ vsphere_folder_name }}'"
-#  community.vmware.vmware_content_deploy_ovf_template:
-#    hostname: "{{ vsphere_hostname }}"
-#    username: "{{ vsphere_user }}"
-#    password: "{{ vsphere_password }}"
-#    datacenter: "{{ vsphere_datacenter }}"
-#    datastore: "{{ vsphere_datastore }}"
-#    cluster: "{{ vsphere_cluster }}"
-#    validate_certs: "{{ vsphere_validate_certs }}"
-#
-#    ovf_template: "{{ vm_template_name }}"
-#    folder: "{{ vsphere_folder_name }}"
-#    name: "{{ vm_name }}"
-#  register: vmware_content_deploy_result
-#  failed_when: false
-#  changed_when: false
-#  loop: "{{ molecule_yml.platforms }}"
-#  vars:
-#    vm_name: "{{username}}_{{vm_prefix}}{{ item.name }}"
-#    vm_template_name: "{{ item.template_name }}"
-#  async: 30
-#  poll: 0
-#
-#- name: Wait for guest_info being available
-#  community.vmware.vmware_guest_info:
-#    hostname: "{{ vsphere_hostname }}"
-#    username: "{{ vsphere_user }}"
-#    password: "{{ vsphere_password }}"
-#    validate_certs: "{{ vsphere_validate_certs }}"
-#    datacenter: "{{ vsphere_datacenter }}"
-#
-#    folder: "{{ vsphere_folder_name }}"
-#    name: "{{ vm_name }}"
-#  loop: "{{ molecule_yml.platforms }}"
-#  vars:
-#    vm_name: "{{username}}_{{vm_prefix}}{{ item.name }}"
-#    vm_template_name: "{{ item.template_name }}"
-#  register: guest_info
-#  until: not guest_info.failed
-#  retries: 8
+- name: Wait for guest_info being available
+  community.vmware.vmware_guest_info:
+    hostname: "{{ vsphere_hostname }}"
+    username: "{{ vsphere_user }}"
+    password: "{{ vsphere_password }}"
+    validate_certs: "{{ vsphere_validate_certs }}"
+    datacenter: "{{ vsphere_datacenter }}"
+
+    folder: "{{ vsphere_folder_name }}"
+    name: "{{username}}_{{vm_prefix}}{{ item.name }}"
+  loop: "{{ molecule_yml.platforms }}"
+  register: guest_info
+  until:
+    - not guest_info.failed
+    - guest_info.instance.hw_files | default([]) | length > 3
+  retries: 30
+  delay: 5
+  failed_when: false
+
+- name: Redo cloning if one or more attempts failed
+  when: guest_info.failed | d(false)
+  block:
+  - name: "Deploy Virtual Machines into folder '{{ vsphere_folder_name }}'"
+    community.vmware.vmware_content_deploy_ovf_template:
+      hostname: "{{ vsphere_hostname }}"
+      username: "{{ vsphere_user }}"
+      password: "{{ vsphere_password }}"
+      datacenter: "{{ vsphere_datacenter }}"
+      datastore_cluster: "{{ vsphere_datastore_cluster }}"
+      cluster: "{{ vsphere_cluster }}"
+      validate_certs: "{{ vsphere_validate_certs }}"
+
+      ovf_template: "{{ item.template_name }}"
+      folder: "{{ vsphere_folder_name }}"
+      name: "{{username}}_{{vm_prefix}}{{ item.name }}"
+    loop: "{{ molecule_yml.platforms }}"
+    register: clone_vm_synchron
+    failed_when:
+      - clone_vm_synchron.failed
+      - "not 'already Exists' in clone_vm_synchron.vm_deploy_info.msg"
 
 - name: "Set hardware spec of VMs"
   community.vmware.vmware_guest:
@@ -67,7 +67,7 @@
     validate_certs: "{{ vsphere_validate_certs }}"
 
     folder: "{{ vsphere_folder_name }}"
-    name: "{{ vm_name }}"
+    name: "{{username}}_{{vm_prefix}}{{ item.name }}"
     state: present
     disk:
     - size_gb: "{{ vm_disk_size_gb }}"
@@ -78,36 +78,31 @@
       num_cpus: "{{ vm_cpu }}"
       num_cpu_cores_per_socket: "{{ vm_cpu_cores }}"
   loop: "{{ molecule_yml.platforms }}"
-  vars:
-    vm_name: "{{username}}_{{vm_prefix}}{{ item.name }}"
-    vm_template_name: "{{ item.template_name }}"
   register: set_hardware_spec
   until: not set_hardware_spec.failed
-  retries: 30
+  retries: 120
+  delay: 5
 
 - name: Poweron VMs
   include_tasks: helper/power_on_vm.yml
   loop: "{{ molecule_yml.platforms }}"
 
-#- name: "Make sure VMs are 'poweredon'"
-#  community.vmware.vmware_guest:
-#    hostname: "{{ vsphere_hostname }}"
-#    username: "{{ vsphere_user }}"
-#    password: "{{ vsphere_password }}"
-#    datacenter: "{{ vsphere_datacenter }}"
-#    datastore: "{{ vsphere_datastore }}"
-#    cluster: "{{ vsphere_cluster }}"
-#    validate_certs: "{{ vsphere_validate_certs }}"
-#
-#    name: "{{ vm_name }}"
-#    state: poweredon
-#  loop: "{{ molecule_yml.platforms }}"
-#  vars:
-#    vm_name: "{{username}}_{{vm_prefix}}{{ item.name }}"
-#    vm_template_name: "{{ item.template_name }}"
-#  register: vmware_poweron_result
-#  async: 30
-#  poll: 0
+- name: "Make sure VMs are 'poweredon'"
+  community.vmware.vmware_guest:
+    hostname: "{{ vsphere_hostname }}"
+    username: "{{ vsphere_user }}"
+    password: "{{ vsphere_password }}"
+    datacenter: "{{ vsphere_datacenter }}"
+    datastore: "{{ vsphere_datastore }}"
+    cluster: "{{ vsphere_cluster }}"
+    validate_certs: "{{ vsphere_validate_certs }}"
+
+    name: "{{username}}_{{vm_prefix}}{{ item.name }}"
+    state: poweredon
+  loop: "{{ molecule_yml.platforms }}"
+  register: vmware_poweron_result
+  async: 30
+  poll: 0
 
 - name: Wait for ip addresses being available
   community.vmware.vmware_guest_info:
@@ -118,10 +113,8 @@
     datacenter: "{{ vsphere_datacenter }}"
 
     folder: "{{ vsphere_folder_name }}"
-    name: "{{ vm_name }}"
+    name: "{{username}}_{{vm_prefix}}{{ item.name }}"
   loop: "{{ molecule_yml.platforms }}"
-  vars:
-    vm_name: "{{username}}_{{vm_prefix}}{{ item.name }}"
   register: guest_info
   until: guest_info.instance.ipv4 | d(False)
   retries: 30

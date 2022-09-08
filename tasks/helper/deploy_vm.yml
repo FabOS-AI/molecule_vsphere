@@ -19,20 +19,5 @@
   register: vmware_content_deploy_result
   failed_when: false
   changed_when: false
-  async: 90
+  async: 600
   poll: 0
-
-
-- name: Wait for guest_info being available
-  community.vmware.vmware_guest_info:
-    hostname: "{{ vsphere_hostname }}"
-    username: "{{ vsphere_user }}"
-    password: "{{ vsphere_password }}"
-    validate_certs: "{{ vsphere_validate_certs }}"
-    datacenter: "{{ vsphere_datacenter }}"
-
-    folder: "{{ vsphere_folder_name }}"
-    name: "{{ vm_name }}"
-  register: guest_info
-  until: not guest_info.failed
-  retries: 15

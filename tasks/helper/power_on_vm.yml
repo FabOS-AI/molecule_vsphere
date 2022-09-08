@@ -19,18 +19,18 @@
   async: 30
   poll: 0
 
-- name: Wait for vm being poweredon
-  community.vmware.vmware_guest_info:
-    hostname: "{{ vsphere_hostname }}"
-    username: "{{ vsphere_user }}"
-    password: "{{ vsphere_password }}"
-    validate_certs: "{{ vsphere_validate_certs }}"
-    datacenter: "{{ vsphere_datacenter }}"
-
-    folder: "{{ vsphere_folder_name }}"
-    name: "{{ vm_name }}"
-  register: guest_info
-  until:
-    - guest_info.instance.hw_power_status is defined
-    - guest_info.instance.hw_power_status == "poweredOn"
-  retries: 15
+#- name: Wait for vm being poweredon
+#  community.vmware.vmware_guest_info:
+#    hostname: "{{ vsphere_hostname }}"
+#    username: "{{ vsphere_user }}"
+#    password: "{{ vsphere_password }}"
+#    validate_certs: "{{ vsphere_validate_certs }}"
+#    datacenter: "{{ vsphere_datacenter }}"
+#
+#    folder: "{{ vsphere_folder_name }}"
+#    name: "{{ vm_name }}"
+#  register: guest_info
+#  until:
+#    - guest_info.instance.hw_power_status is defined
+#    - guest_info.instance.hw_power_status == "poweredOn"
+#  retries: 15
