@@ -12,10 +12,8 @@
     datacenter: "{{ vsphere_datacenter }}"
 
     folder: "{{ vsphere_folder_name }}"
-    name: "{{ vm_name }}"
+    name: "{{username}}_{{vm_prefix}}{{ item.name }}"
   register: guest_info
-  vars:
-    vm_name: "{{username}}_{{vm_prefix}}{{ item.name }}"
 
 - set_fact:
     results: |
