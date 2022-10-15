@@ -127,7 +127,16 @@
     vm_template_name: "{{ item.template_name }}"
 
 - name: "Set Hostname"
-  ansible.builtin.command: "hostname {{ item.name }}"
+  ansible.builtin.command: "hostnamectl set-hostname {{ item.name }}"
+  loop: "{{ molecule_yml.platforms }}"
+  delegate_to: "{{ item.name }}"
+  become: yes
+  changed_when: false
+
+- name: "Restart network service to grep hostname"
+  ansible.builtin.service:
+    name: systemd-networkd
+    state: restarted
   loop: "{{ molecule_yml.platforms }}"
   delegate_to: "{{ item.name }}"
   become: yes
