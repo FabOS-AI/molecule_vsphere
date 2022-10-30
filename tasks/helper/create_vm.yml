@@ -70,17 +70,17 @@
     name: "{{username}}_{{vm_prefix}}{{ item.name }}"
     state: present
     disk:
-    - size_gb: "{{ vm_disk_size_gb }}"
+    - size_gb: "{{ item.vm_disk_size_gb | default(vm_disk_size_gb) }}"
       type: thin
       datastore: "{{ vsphere_datastore }}"
     hardware:
-      memory_mb: "{{ vm_memory_mb }}"
-      num_cpus: "{{ vm_cpu }}"
-      num_cpu_cores_per_socket: "{{ vm_cpu_cores }}"
+      memory_mb: "{{ item.vm_memory_mb | default(vm_memory_mb) }}"
+      num_cpus: "{{ item.vm_num_cpus | default(vm_cpu) }}"
+      num_cpu_cores_per_socket: "{{ item.vm_num_cpu_cores_per_socket | default(vm_cpu_cores) }}"
   loop: "{{ molecule_yml.platforms }}"
   register: set_hardware_spec
   until: not set_hardware_spec.failed
-  retries: 120
+  retries: 5
   delay: 5
 
 - name: Poweron VMs
