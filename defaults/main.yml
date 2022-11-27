@@ -1,8 +1,9 @@
 ---
 # Control Node config:
 control_node_pip_packages:
-  - PyVmomi
-  - git+https://github.com/vmware/vsphere-automation-sdk-python.git
+  - name: PyVmomi
+    version: 7.0.3
+  - name: git+https://github.com/vmware/vsphere-automation-sdk-python.git
 
 # vsphere
 vsphere_datacenter: Ansible
