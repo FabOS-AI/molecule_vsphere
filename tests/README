@@ -17,4 +17,4 @@ roles_path=~/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles:/tmp/rol
 
 ODER:
 
-$ mkdir ~/.ansible/roles && ln -s /tmp/roles/ ~/.ansible/roles/molecule_vsphere
+$ mkdir -p ~/.ansible/roles && ln -s /tmp/roles/ ~/.ansible/roles/molecule_vsphere
