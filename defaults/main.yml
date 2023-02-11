@@ -19,7 +19,9 @@ vm_template_password: password
 
 # vm defaults
 vm_prefix: ""
-vm_disk_size_gb: 40
+vm_disk_size_gb:
+  linux: 40
+  windows: 100
 vm_memory_mb: 4096
 vm_cpu: 2
 vm_cpu_cores: 1
