@@ -129,6 +129,12 @@
     vm_name: "{{username}}_{{vm_prefix}}{{ item.name }}"
     vm_template_name: "{{ item.template_name }}"
 
+- name: Wait for ports being available
+  ansible.builtin.wait_for:
+    host: "{{ item.value.ansible_host }}"
+    port: "{{ item.value.ansible_port | default(22) }}"
+  loop: "{{ hostvars | dict2items }}"
+
 - name: "Set Hostname (Linux)"
   ansible.builtin.command: "hostname {{ item.name }}"
   loop: "{{ molecule_yml.platforms }}"
