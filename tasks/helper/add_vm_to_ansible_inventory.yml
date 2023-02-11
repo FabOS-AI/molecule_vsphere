@@ -5,12 +5,11 @@
     password: "{{ vsphere_password }}"
     validate_certs: "{{ vsphere_validate_certs }}"
     datacenter: "{{ vsphere_datacenter }}"
-
     folder: "{{ vsphere_folder_name }}"
     name: "{{ vm_name }}"
   register: guest_info
 
-- name: "Add VM '{{vm_name}}' to Ansible Inventory"
+- name: "Add VM '{{vm_name}}' to Ansible Inventory (Linux)"
   add_host:
     name: "{{ item.name }}"
     groups: "{{ item.groups | default([]) }}"
@@ -23,3 +22,23 @@
     ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o "UserKnownHostsFile=/dev/null"'
   no_log: true
   changed_when: false
+  when: '"windows" not in item.template_name'
+
+- name: "Add VM '{{vm_name}}' to Ansible Inventory (Windows)"
+  add_host:
+    name: "{{ item.name }}"
+    groups: "{{ item.groups | default([]) }}"
+    ansible_connection: winrm
+    ansible_port: 5985
+    ansible_host: "{{ guest_info.instance.ipv4 }}"
+    ansible_user: "{{ vm_template_username }}"
+    ansible_password: "{{ vm_template_password }}"
+    ansible_become_user: "{{ vm_template_username }}"
+    ansible_become_pass: "{{ vm_template_password }}"
+    ansible_become_method: "runas"
+    ansible_winrm_transport: "basic"
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o "UserKnownHostsFile=/dev/null"'
+  no_log: true
+  changed_when: false
+  when: '"windows" in item.template_name'
