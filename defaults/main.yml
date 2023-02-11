@@ -4,6 +4,7 @@ control_node_pip_packages:
   - name: PyVmomi
     version: 7.0.3
   - name: git+https://github.com/vmware/vsphere-automation-sdk-python.git
+  - name: pywinrm
 
 # vsphere
 vsphere_datacenter: Ansible

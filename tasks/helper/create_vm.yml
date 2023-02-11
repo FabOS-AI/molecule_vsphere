@@ -129,10 +129,6 @@
     vm_name: "{{username}}_{{vm_prefix}}{{ item.name }}"
     vm_template_name: "{{ item.template_name }}"
 
-- name: Install pywinrm
-  ansible.builtin.pip:
-    name: pywinrm
-
 - name: "Set Hostname (Linux)"
   ansible.builtin.command: "hostname {{ item.name }}"
   loop: "{{ molecule_yml.platforms }}"
