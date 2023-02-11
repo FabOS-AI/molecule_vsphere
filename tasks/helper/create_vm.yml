@@ -70,7 +70,7 @@
     name: "{{username}}_{{vm_prefix}}{{ item.name }}"
     state: present
     disk:
-    - size_gb: "{{ item.vm_disk_size_gb | default(vm_disk_size_gb) }}"
+    - size_gb: "{{ item.vm_disk_size_gb | default(vm_disk_size_gb.windows if 'windows' in item.template_name else vm_disk_size_gb.windows ) }}"
       type: thin
       datastore: "{{ vsphere_datastore }}"
     hardware:
@@ -127,9 +127,23 @@
     vm_name: "{{username}}_{{vm_prefix}}{{ item.name }}"
     vm_template_name: "{{ item.template_name }}"
 
-- name: "Set Hostname"
+- name: Install pywinrm
+  ansible.builtin.pip:
+    name: pywinrm
+
+- name: "Set Hostname (Linux)"
   ansible.builtin.command: "hostname {{ item.name }}"
   loop: "{{ molecule_yml.platforms }}"
   delegate_to: "{{ item.name }}"
   become: yes
   changed_when: false
+  when: '"windows" not in item.template_name'
+
+- name: "Set Hostname (Windows)"
+  ansible.windows.win_hostname :
+    name: "{{ item.name }}"
+  loop: "{{ molecule_yml.platforms }}"
+  delegate_to: "{{ item.name }}"
+  become: yes
+  changed_when: false
+  when: '"windows" in item.template_name'
