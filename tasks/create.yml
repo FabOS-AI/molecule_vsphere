@@ -35,6 +35,11 @@
     folder_type: vm
     state: present
 
+#- name: Create Networks
+#  include_tasks: helper/create_networks.yml
+#
+#- fail:
+
 - name: Create VM
   include_tasks: helper/create_vm.yml
   vars:
