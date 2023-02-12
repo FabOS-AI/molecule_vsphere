@@ -15,7 +15,9 @@
     name: "{{username}}_{{vm_prefix}}{{ item.name }}"
   register: guest_info
 
-- set_fact:
+- name: Set results (Linux)
+  when: '"windows" not in item.template_name'
+  set_fact:
     results: |
       {{ results | default([]) +
         [{
@@ -25,6 +27,22 @@
           'password': 'password',
           'port': 22,
           'connection': 'ssh',
+          'identity_file': ''
+        }]
+      }}
+
+- name: Set results (Windows)
+  when: '"windows" in item.template_name'
+  set_fact:
+    results: |
+      {{ results | default([]) +
+        [{
+          'instance': item.name,
+          'address': guest_info.instance.ipv4,
+          'user': 'ansible',
+          'password': 'password',
+          'port': 5985,
+          'connection': 'winrm',
           'identity_file': ''
         }]
       }}
