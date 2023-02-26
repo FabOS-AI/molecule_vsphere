@@ -150,6 +150,9 @@
     name: "{{ item.name }}"
   async: 15
   poll: 3
+  register: set_win_hostname
+  retries: 10
+  until: not set_win_hostname.failed
   loop: "{{ molecule_yml.platforms }}"
   delegate_to: "{{ item.name }}"
   become: yes
