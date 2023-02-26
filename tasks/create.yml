@@ -16,7 +16,6 @@
     password: "{{ vsphere_password }}"
     datacenter: "{{ vsphere_datacenter }}"
     validate_certs: "{{ vsphere_validate_certs }}"
-
     folder_name: "{{ vsphere_folder_molecule }}"
     parent_folder: ""
     folder_type: vm
