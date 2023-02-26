@@ -16,8 +16,8 @@
     ansible_connection: ssh
     ansible_host: "{{ guest_info.instance.ipv4 }}"
     ansible_user: "{{ vm_template_username }}"
-    ansible_ssh_pass: "{{ vm_template_password }}"
-    ansible_become_pass: "{{ vm_template_password }}"
+    ansible_ssh_password: "{{ vm_template_password }}"
+    ansible_become_password: "{{ vm_template_password }}"
     ansible_python_interpreter: /usr/bin/python3
     ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o "UserKnownHostsFile=/dev/null"'
   no_log: true
@@ -34,7 +34,7 @@
     ansible_user: "{{ vm_template_username }}"
     ansible_password: "{{ vm_template_password }}"
     ansible_become_user: "{{ vm_template_username }}"
-    ansible_become_pass: "{{ vm_template_password }}"
+    ansible_become_password: "{{ vm_template_password }}"
     ansible_shell_type: powershell
     ansible_python_interpreter: /usr/bin/python3
     ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o "UserKnownHostsFile=/dev/null" -o ServerAliveInterval=10'
