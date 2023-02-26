@@ -98,7 +98,6 @@
     datastore: "{{ vsphere_datastore }}"
     cluster: "{{ vsphere_cluster }}"
     validate_certs: "{{ vsphere_validate_certs }}"
-
     name: "{{username}}_{{vm_prefix}}{{ item.name }}"
     state: poweredon
   loop: "{{ molecule_yml.platforms }}"
@@ -150,8 +149,6 @@
     name: "{{ item.name }}"
   async: 15
   poll: 3
-  register: set_win_hostname
-  retries: 10
   until: not set_win_hostname.failed
   loop: "{{ molecule_yml.platforms }}"
   delegate_to: "{{ item.name }}"
