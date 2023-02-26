@@ -22,7 +22,6 @@
     password: "{{ vsphere_password }}"
     validate_certs: "{{ vsphere_validate_certs }}"
     datacenter: "{{ vsphere_datacenter }}"
-
     folder: "{{ vsphere_folder_name }}"
     name: "{{username}}_{{vm_prefix}}{{ item.name }}"
   loop: "{{ molecule_yml.platforms }}"
@@ -114,13 +113,16 @@
     password: "{{ vsphere_password }}"
     validate_certs: "{{ vsphere_validate_certs }}"
     datacenter: "{{ vsphere_datacenter }}"
-
     folder: "{{ vsphere_folder_name }}"
     name: "{{username}}_{{vm_prefix}}{{ item.name }}"
   loop: "{{ molecule_yml.platforms }}"
   register: guest_info
   until: guest_info.instance.ipv4 | d(False)
   retries: 30
+
+- name: Let VM settle
+  ansible.builtin.wait_for:
+    timeout: 5
 
 - name: Add vm to ansible inventory
   include_tasks: helper/add_vm_to_ansible_inventory.yml
@@ -129,11 +131,11 @@
     vm_name: "{{username}}_{{vm_prefix}}{{ item.name }}"
     vm_template_name: "{{ item.template_name }}"
 
-- name: Wait for ports being available
-  ansible.builtin.wait_for:
-    host: "{{ item.value.ansible_host }}"
-    port: "{{ item.value.ansible_port | default(22) }}"
-  loop: "{{ hostvars | dict2items }}"
+#- name: Wait for ports being available
+#  ansible.builtin.wait_for:
+#    host: "{{ item.value.ansible_host }}"
+#    port: "{{ item.value.ansible_port | default(22) }}"
+#  loop: "{{ hostvars | dict2items }}"
 
 - name: "Set Hostname (Linux)"
   ansible.builtin.command: "hostname {{ item.name }}"
@@ -146,6 +148,8 @@
 - name: "Set Hostname (Windows)"
   ansible.windows.win_hostname :
     name: "{{ item.name }}"
+  async: 15
+  poll: 3
   loop: "{{ molecule_yml.platforms }}"
   delegate_to: "{{ item.name }}"
   become: yes
