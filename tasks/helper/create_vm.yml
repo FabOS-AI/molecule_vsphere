@@ -29,7 +29,7 @@
   until:
     - not guest_info.failed
     - guest_info.instance.hw_files | default([]) | length > 3
-  retries: 30
+  retries: 120
   delay: 5
   failed_when: false
 
