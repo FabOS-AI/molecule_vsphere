@@ -121,7 +121,7 @@
 
 - name: Let VM settle
   ansible.builtin.wait_for:
-    timeout: 30
+    timeout: 60
 
 - name: Add vm to ansible inventory
   include_tasks: helper/add_vm_to_ansible_inventory.yml
