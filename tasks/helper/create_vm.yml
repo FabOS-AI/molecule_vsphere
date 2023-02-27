@@ -117,7 +117,7 @@
   loop: "{{ molecule_yml.platforms }}"
   register: guest_info
   until: guest_info.instance.ipv4 | d(False)
-  retries: 60
+  retries: 120
 
 - name: Let VM settle
   ansible.builtin.wait_for:
